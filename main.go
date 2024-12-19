@@ -13,7 +13,6 @@ import (
 
 var (
 	db       *sql.DB
-	Validate *validator.Validate
 )
 
 type todo struct {
@@ -22,9 +21,6 @@ type todo struct {
 	Completed bool   `json:"completed"`
 }
 
-func init() {
-	Validate = validator.New()
-}
 
 func parseValidationError(err error) string {
 	if validationErrors, ok := err.(validator.ValidationErrors); ok {
@@ -52,7 +48,7 @@ func parseIDParam(ginContext *gin.Context) (int64, error) {
 }
 
 type todoPayload struct {
-	Item      string `json:"item" validate:"required,max=100,min=2"`
+	Item      string `json:"item" binding:"required,max=100,min=2"`
 	Completed bool   `json:"completed"`
 }
 
@@ -60,11 +56,6 @@ func createTodo(ginContext *gin.Context) {
 	var payload todoPayload
 
 	if err := ginContext.ShouldBindJSON(&payload); err != nil {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
-		return
-	}
-
-	if err := Validate.Struct(payload); err != nil {
 		ginContext.JSON(http.StatusBadRequest, gin.H{"error": parseValidationError(err)})
 		return
 	}
@@ -162,11 +153,6 @@ func updateTodo(ginContext *gin.Context) {
 
 	var payload todoPayload
 	if err := ginContext.ShouldBindJSON(&payload); err != nil {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
-		return
-	}
-
-	if err := Validate.Struct(payload); err != nil {
 		ginContext.JSON(http.StatusBadRequest, gin.H{"error": parseValidationError(err)})
 		return
 	}
