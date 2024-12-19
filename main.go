@@ -215,11 +215,20 @@ func main() {
 	fmt.Println("Connected to MySQL")
 
 	router := gin.Default()
-	router.GET("/todos", getTodos)
-	router.POST("/todos", createTodo)
-	router.GET("/todos/:id", getTodo)
-	router.PATCH("/todos/:id", toggleTodoStatus)
-	router.PUT("/todos/:id", updateTodo)
-	router.DELETE("/todos/:id", deleteTodo)
+
+	todos :=router.Group("/todos")
+	{
+		todos.GET("", getTodos)
+		todos.POST("", createTodo)
+
+		todo := todos.Group("/:id")
+		{
+			todo.GET("", getTodo)
+			todo.PATCH("", toggleTodoStatus)
+			todo.PUT("", updateTodo)
+			todo.DELETE("", deleteTodo)
+		}
+	}
+
 	router.Run("localhost:9191")
 }
